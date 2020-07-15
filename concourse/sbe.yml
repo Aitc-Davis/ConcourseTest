@@ -1,0 +1,35 @@
+resources:
+  - name: git-repo
+    type: git
+    source:
+      uri: https://github.com/Davis1557/ConcourseTest.git
+      branch: master
+
+
+jobs:
+  - name: job
+    plan:
+      - get: git-repo
+        trigger: true
+      - task: maven-package
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: maven
+              tag: 3.6.3-slim
+          inputs:
+            - name: git-repo
+          caches:
+            - path: maven-cache
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                echo "Generating symbolic link for maven repo cache"
+                find "${HOME}/.m2" && ( find maven-cache || ln -s maven-cache ${HOME}/.m2 )
+
+                cd git-repo
+                mvn clean package
