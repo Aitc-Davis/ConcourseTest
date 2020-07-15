@@ -4,12 +4,6 @@ resources:
     source:
       uri: https://github.com/Davis1557/ConcourseTest.git
       branch: master
-
-  - name: git-repo-update
-    type: git
-    source:
-      uri: https://github.com/Davis1557/ConcourseTest.git
-      branch: master
       username: davis1557
       password: Tobe0912
 
@@ -30,8 +24,6 @@ jobs:
             - name: git-repo
           outputs:
             - name: git-repo
-          params:
-            ECHO_TEST: hello-world
           run:
             path: /bin/bash
             args:
@@ -43,7 +35,24 @@ jobs:
                 echo "Move Jar To Release Dir"
                 mkdir -p release/${DT}
                 cp target/*.jar release/${DT}/
-                mvn clean
-      - put: git-repo-update
+      - task: git-commit
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: concourse/git-resource
+          inputs:
+            - name: git-repo
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                cd git-repo
+                git add release/**/*
+                git commit -m "by Davis"
+
+      - put: git-repo
         params:
           repository: git-repo
