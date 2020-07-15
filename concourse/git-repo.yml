@@ -1,0 +1,59 @@
+resources:
+  - name: git-repo
+    type: git
+    source:
+      uri: https://github.com/Davis1557/ConcourseTest.git
+      branch: master
+      username: davis1557
+      password: Tobe0912
+
+jobs:
+  - name: job
+    plan:
+      - get: git-repo
+        trigger: true
+      - task: maven-package
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: maven
+              tag: 3.6.3-slim
+          inputs:
+            - name: git-repo
+          outputs:
+            - name: git-repo
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                export DT=$(date +"%Y%m%d%H%M%S")
+                cd git-repo
+                mvn clean package -s settings.xml
+                echo "Move Jar To Release Dir"
+                mkdir -p release/${DT}
+                cp target/*.jar release/${DT}/
+      - task: git-commit
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: concourse/git-resource
+          inputs:
+            - name: git-repo
+          outputs:
+            - name: git-repo
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                cd git-repo
+                git add release/**/*
+                git commit -m "by Davis"
+      - put: git-repo
+        params:
+          repository: git-repo

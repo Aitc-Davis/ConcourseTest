@@ -1,0 +1,49 @@
+resources:
+  - name: git-repo
+    type: git
+    source:
+      uri: https://github.com/Davis1557/ConcourseTest.git
+      branch: master
+  - name: git-release
+    type: github-release
+    source:
+      owner: Davis1557
+      repository: ConcourseTest
+      access_token: f193a4dd62f5b6045e239bd566b259aa93a5f69b
+
+jobs:
+  - name: job
+    plan:
+      - get: git-repo
+        trigger: true
+      - task: maven-package
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: maven
+              tag: 3.6.3-slim
+          inputs:
+            - name: git-repo
+          outputs:
+            - name: release
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                export DT=$(date +"%Y%m%d%H%M%S")
+                cd git-repo
+                mvn clean package -s settings.xml
+                echo "Move Jar To Release Dir"
+                mkdir -p release/${DT}
+                cp target/*.jar ../release
+                echo "SBE" >> ../release/name
+                echo "${DT}" >> ../release/tag
+      - put: git-release
+        params:
+          name: release/name
+          tag: release/tag
+          globs:
+            - release/*.jar
