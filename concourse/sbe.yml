@@ -5,12 +5,13 @@ resources:
       uri: https://github.com/Davis1557/ConcourseTest.git
       branch: master
 
-  - name: git-release
+  - name: git-repo-update
     type: git
     source:
       uri: https://github.com/Davis1557/ConcourseTest.git
-      branch: release
-
+      branch: master
+      username: davis1557
+      password: Tobe0912
 
 jobs:
   - name: job
@@ -27,8 +28,8 @@ jobs:
               tag: 3.6.3-slim
           inputs:
             - name: git-repo
-          caches:
-            - path: /root/.m2
+          outputs:
+            - name: git-repo
           params:
             ECHO_TEST: hello-world
           run:
@@ -36,6 +37,13 @@ jobs:
             args:
               - -c
               - |
-                echo ${ECHO_TEST}
+                export DT=$(date +"%Y%m%d%H%M%S")
                 cd git-repo
-                mvn clean package
+                mvn clean package -s settings.xml
+                echo "Move Jar To Release Dir"
+                mkdir -p release/${DT}
+                cp target/*.jar release/${DT}/
+                mvn clean
+      - put: git-repo-update
+        params:
+          repository: git-repo
