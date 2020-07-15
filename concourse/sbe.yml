@@ -5,6 +5,12 @@ resources:
       uri: https://github.com/Davis1557/ConcourseTest.git
       branch: master
 
+  - name: git-release
+    type: git
+    source:
+      uri: https://github.com/Davis1557/ConcourseTest.git
+      branch: release
+
 
 jobs:
   - name: job
@@ -22,14 +28,14 @@ jobs:
           inputs:
             - name: git-repo
           caches:
-            - path: maven-cache
+            - path: /root/.m2
+          params:
+            ECHO_TEST: hello-world
           run:
             path: /bin/bash
             args:
               - -c
               - |
-                echo "Generating symbolic link for maven repo cache"
-                find "${HOME}/.m2" && ( find maven-cache || ln -s maven-cache ${HOME}/.m2 )
-
+                echo ${ECHO_TEST}
                 cd git-repo
                 mvn clean package
