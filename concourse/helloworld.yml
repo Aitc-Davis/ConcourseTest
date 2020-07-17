@@ -6,8 +6,22 @@ jobs:
         config:
           platform: linux
           image_resource:
-            type: registry-image
-            source: { repository: busybox }
+            type: docker-image
+            source:
+              repository: busybox
+          run:
+            path: echo
+            args: ["Hello, world!"]
+  - name: job2
+    public: true
+    plan:
+      - task: simple-task2
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: busybox
           run:
             path: echo
             args: ["Hello, world!"]

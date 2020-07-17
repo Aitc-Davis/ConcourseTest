@@ -9,10 +9,11 @@ resources:
     source:
       owner: Davis1557
       repository: ConcourseTest
-      access_token: f193a4dd62f5b6045e239bd566b259aa93a5f69b
+      access_token: 61294f4d0223cd4095a229509636974052dbaf39
 
 jobs:
-  - name: job
+  - name: repo_to_release
+    max_in_flight: 1
     plan:
       - get: git-repo
         trigger: true
@@ -20,10 +21,12 @@ jobs:
         config:
           platform: linux
           image_resource:
-            type: registry-image
+            type: docker-image
             source:
-              repository: maven
+              repository: vm.docker.internal:5000/maven
               tag: 3.6.3-slim
+              insecure_registries:
+                - vm.docker.internal:5000
           inputs:
             - name: git-repo
           outputs:

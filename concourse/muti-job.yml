@@ -1,0 +1,59 @@
+resources:
+  - name: every-30s
+    type: time
+    icon: clock-outline
+    source:
+      interval: 30s
+  - name: every-20s
+    type: time
+    icon: clock-outline
+    source:
+      interval: 20s
+
+jobs:
+  - name: triggered-first
+    public: true
+    plan:
+      - get: every-20s
+        trigger: true
+      - get: every-30s
+        trigger: true
+      - task: simple-task
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: busybox }
+          run:
+            path: echo
+            args: ["Hello, world!"]
+  - name: not-triggered
+    public: true
+    plan:
+      - get: every-20s
+        passed: [triggered-first]
+        trigger: true
+      - task: simple-task
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: busybox }
+          run:
+            path: echo
+            args: ["Hello, world!"]
+  - name: triggered-second
+    public: true
+    plan:
+      - get: every-30s
+        passed: [triggered-first]
+        trigger: true
+      - task: simple-task
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: busybox }
+          run:
+            path: echo
+            args: ["Hello, world!"]
