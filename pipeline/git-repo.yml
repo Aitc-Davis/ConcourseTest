@@ -16,19 +16,24 @@ jobs:
   - name: repo_to_repo2
     max_in_flight: 1
     plan:
-      - get: git-repo
-        trigger: true
-      - get: git-repo2
+      - in_parallel:
+        - get: git-repo
+          trigger: true
+        - get: git-repo2
       - task: maven-package
         config:
           platform: linux
+          image: test-image
           image_resource:
             type: docker-image
             source:
               repository: vm.docker.internal:5000/maven
-              tag: 3.6.3-slim
-              insecure_registries:
-                - vm.docker.internal:5000
+              tag: by-davis
+              username: docker
+              password: docker
+              ca_certs:
+                - domain: vm.docker.internal:5000
+                  cert: ((docker-registry-ca))
           inputs:
             - name: git-repo
             - name: git-repo2
@@ -41,31 +46,15 @@ jobs:
               - |
                 export DT=$(date +"%Y%m%d%H%M%S")
                 cd git-repo
-                mvn clean package -s settings.xml
+                mvn clean package
                 echo "Move Jar To Release Dir"
                 mkdir -p ../git-repo2/${DT}
                 cp target/*.jar ../git-repo2/${DT}/
-      - task: git-commit
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: vm.docker.internal:5000/concourse/git-resource
-              insecure_registries:
-                - vm.docker.internal:5000
-          inputs:
-            - name: git-repo2
-          outputs:
-            - name: git-repo2
-          run:
-            path: /bin/bash
-            args:
-              - -c
-              - |
-                cd git-repo2
+                cd ../git-repo2
+                git config --global user.name "Davis"
+                git config --global user.email "davis@aitc.com.tw"
                 git add **/*
-                git commit -m "by Davis"
+                git commit -m "Upload by Davis"
       - put: git-repo2
         params:
           repository: git-repo2

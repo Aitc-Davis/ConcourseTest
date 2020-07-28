@@ -1,3 +1,16 @@
+resource_types:
+  - name: registry-image-davis
+    type: docker-image
+    source:
+      repository: vm.docker.internal:5000/concourse/registry-image-resource
+      privileged: true
+      tag: by-davis
+      username: docker
+      password: docker
+      ca_certs:
+        - domain: vm.docker.internal:5000
+          cert: ((docker-registry-ca))
+
 resources:
   - name: git-repo
     type: git
@@ -9,7 +22,14 @@ resources:
     source:
       owner: Davis1557
       repository: ConcourseTest
-      access_token: 61294f4d0223cd4095a229509636974052dbaf39
+      access_token: 6251710980b1287d1e77d66ff6b9058fff5f6a08
+  - name: test-image
+    type: registry-image-davis
+    source:
+      repository: vm.docker.internal:5000/maven
+      tag: by-davis
+      username: docker
+      password: docker
 
 jobs:
   - name: repo_to_release
@@ -17,16 +37,11 @@ jobs:
     plan:
       - get: git-repo
         trigger: true
+      - get: test-image
       - task: maven-package
+        image: test-image
         config:
           platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: vm.docker.internal:5000/maven
-              tag: 3.6.3-slim
-              insecure_registries:
-                - vm.docker.internal:5000
           inputs:
             - name: git-repo
           outputs:
@@ -38,7 +53,7 @@ jobs:
               - |
                 export DT=$(date +"%Y%m%d%H%M%S")
                 cd git-repo
-                mvn clean package -s settings.xml
+                mvn clean package
                 echo "Move Jar To Release Dir"
                 mkdir -p release/${DT}
                 cp target/*.jar ../release

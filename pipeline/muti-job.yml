@@ -1,0 +1,49 @@
+resources:
+  - name: every-10s
+    type: time
+    icon: clock-outline
+    check_every: 5s
+    source:
+      interval: 10s
+  - name: every-20s
+    type: time
+    icon: clock-outline
+    check_every: 5s
+    source:
+      interval: 20s
+
+jobs:
+  - name: job_1
+    plan:
+      - get: every-20s
+        trigger: true
+      - task: simple-task
+        file: hello-task.yml
+        vars:
+          echo-text: Hello!! job_1
+  - name: job_1_passed
+    public: true
+    plan:
+      - get: every-20s
+        passed: [job_1]
+        trigger: true
+      - task: simple-task
+        file: hello-task.yml
+        vars:
+          echo-text: Hello!! job_1_passed
+  - name: job_2
+    plan:
+      - get: every-10s
+        trigger: true
+      - task: simple-task
+        file: hello-task.yml
+        vars:
+          echo-text: Hello!! job_2
+  - name: job_2_nopassed
+    plan:
+      - get: every-10s
+        trigger: true
+      - task: simple-task
+        file: hello-task.yml
+        vars:
+          echo-text: Hello!! job_2_nopassed
