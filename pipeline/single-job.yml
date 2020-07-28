@@ -1,0 +1,24 @@
+resources:
+  - name: git-repo
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/Davis1557/ConcourseTest.git
+      branch: master
+  - name: every-15s
+    type: time
+    icon: clock-outline
+    check_every: 10s
+    source:
+      interval: 15s
+
+jobs:
+  - name: job_1
+    plan:
+      - get: every-15s
+        trigger: true
+      - get: git-repo
+      - task: simple-task
+        file: git-repo/pipeline/hello-task.yml
+        vars:
+          echo-text: Hello!! job_1

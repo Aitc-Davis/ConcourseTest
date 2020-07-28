@@ -1,57 +1,64 @@
 resources:
-  - name: git-repo
-    type: git
+  - name: git-repo    # 資源名稱為 git-repo
+    type: git    # 資源類型為 git
+    icon: github    # icon 圖示為 github
+    check_every: 10s    # 每 10s 重新檢查一次資源更新版本 ( 預設為 1m )
     source:
-      uri: https://github.com/Davis1557/ConcourseTest.git
-      branch: master
-  - name: every-10s
+      uri: https://github.com/Davis1557/ConcourseTest.git    # git 路徑
+      branch: master    # git 分支
+
+  - name: every-1m    # 資源名稱為 every-1m
+    type: time    # 資源類型為 time
+    icon: clock-outline    # icon 圖示為 clock-outline
+    check_every: 10s
+    source:
+      interval: 1m    # 刷新週期為 1m
+
+  - name: every-2m
     type: time
     icon: clock-outline
-    check_every: 5s
+    check_every: 10s
     source:
-      interval: 10s
-  - name: every-20s
-    type: time
-    icon: clock-outline
-    check_every: 5s
-    source:
-      interval: 20s
+      interval: 2m
 
 jobs:
-  - name: job_1
-    plan:
-      - get: git-repo
-      - get: every-20s
-        trigger: true
-      - task: simple-task
-        file: git-repo/pipeline/hello-task.yml
-        vars:
+  - name: job_1    # Job 名稱為 job_1
+    plan:    # 流程規劃
+      - get: every-1m    # 取得 every-1m 的 Artifact
+        trigger: true    # 檢查到 every-1m 的版本更新會觸發此 Job 運作
+      - get: git-repo    # 取得 git-repo 的 Artifact
+      - task: simple-task    # Task 名稱為 simple-task
+        file: git-repo/pipeline/hello-task.yml    # 從 Artifact 中取得詳細配置
+        vars:    # 注入 Vars Key:Value
           echo-text: Hello!! job_1
+
   - name: job_1_passed
     public: true
     plan:
-      - get: git-repo
-      - get: every-20s
-        passed: [job_1]
+      - get: every-1m
+        passed: [job_1]    # 執行過 job_1 才能執行此 job
         trigger: true
+      - get: git-repo
       - task: simple-task
         file: git-repo/pipeline/hello-task.yml
         vars:
           echo-text: Hello!! job_1_passed
+
   - name: job_2
     plan:
-      - get: git-repo
-      - get: every-10s
+      - get: every-2m
         trigger: true
+      - get: git-repo
       - task: simple-task
         file: git-repo/pipeline/hello-task.yml
         vars:
           echo-text: Hello!! job_2
+
   - name: job_2_nopassed
     plan:
-      - get: git-repo
-      - get: every-10s
+      - get: every-2m
         trigger: true
+      - get: git-repo
       - task: simple-task
         file: git-repo/pipeline/hello-task.yml
         vars:
