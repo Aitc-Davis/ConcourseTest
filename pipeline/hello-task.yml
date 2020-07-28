@@ -1,10 +1,10 @@
 platform: linux
-  image_resource:
-    type: registry-image
-    source: { repository: busybox }
-  inputs:
-    - name: git-repo
-  run:
-    path: echo
-    args:
-      - ((echo-text))
+image_resource:
+  type: registry-image
+  source: { repository: busybox }
+inputs:
+  - name: git-repo
+run:
+  path: echo
+  args:
+    - ((echo-text))
