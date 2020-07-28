@@ -1,4 +1,9 @@
 resources:
+  - name: git-repo
+    type: git
+    source:
+      uri: https://github.com/Davis1557/ConcourseTest.git
+      branch: master
   - name: every-10s
     type: time
     icon: clock-outline
@@ -15,35 +20,39 @@ resources:
 jobs:
   - name: job_1
     plan:
+      - get: git-repo
       - get: every-20s
         trigger: true
       - task: simple-task
-        file: hello-task.yml
+        file: git-repo/pipeline/hello-task.yml
         vars:
           echo-text: Hello!! job_1
   - name: job_1_passed
     public: true
     plan:
+      - get: git-repo
       - get: every-20s
         passed: [job_1]
         trigger: true
       - task: simple-task
-        file: hello-task.yml
+        file: git-repo/pipeline/hello-task.yml
         vars:
           echo-text: Hello!! job_1_passed
   - name: job_2
     plan:
+      - get: git-repo
       - get: every-10s
         trigger: true
       - task: simple-task
-        file: hello-task.yml
+        file: git-repo/pipeline/hello-task.yml
         vars:
           echo-text: Hello!! job_2
   - name: job_2_nopassed
     plan:
+      - get: git-repo
       - get: every-10s
         trigger: true
       - task: simple-task
-        file: hello-task.yml
+        file: git-repo/pipeline/hello-task.yml
         vars:
           echo-text: Hello!! job_2_nopassed
