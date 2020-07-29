@@ -1,11 +1,13 @@
 resources:
   - name: git-repo
     type: git
+    icon: github
     source:
       uri: https://github.com/Davis1557/ConcourseTest.git
       branch: master
   - name: git-repo2
     type: git
+    icon: github
     source:
       uri: https://github.com/Davis1557/ConcourseTest2.git
       branch: master
@@ -23,7 +25,6 @@ jobs:
       - task: maven-package
         config:
           platform: linux
-          image: test-image
           image_resource:
             type: docker-image
             source:

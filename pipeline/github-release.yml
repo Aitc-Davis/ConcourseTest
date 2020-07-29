@@ -3,7 +3,6 @@ resource_types:
     type: docker-image
     source:
       repository: vm.docker.internal:5000/concourse/registry-image-resource
-      privileged: true
       tag: by-davis
       username: docker
       password: docker
@@ -14,17 +13,20 @@ resource_types:
 resources:
   - name: git-repo
     type: git
+    icon: github
     source:
       uri: https://github.com/Davis1557/ConcourseTest.git
       branch: master
   - name: git-release
     type: github-release
+    icon: github
     source:
       owner: Davis1557
       repository: ConcourseTest
-      access_token: 6251710980b1287d1e77d66ff6b9058fff5f6a08
-  - name: test-image
+      access_token: a077afd5215b53d5b18c32f3f8362f94698654d6
+  - name: maven-image
     type: registry-image-davis
+    icon: oci
     source:
       repository: vm.docker.internal:5000/maven
       tag: by-davis
@@ -33,13 +35,13 @@ resources:
 
 jobs:
   - name: repo_to_release
-    max_in_flight: 1
     plan:
-      - get: git-repo
-        trigger: true
-      - get: test-image
+      - in_parallel:
+        - get: git-repo
+          trigger: true
+        - get: maven-image
       - task: maven-package
-        image: test-image
+        image: maven-image
         config:
           platform: linux
           inputs:
