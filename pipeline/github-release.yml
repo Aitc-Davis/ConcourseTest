@@ -23,7 +23,7 @@ resources:
     source:
       owner: Davis1557
       repository: ConcourseTest
-      access_token: a077afd5215b53d5b18c32f3f8362f94698654d6
+      access_token: a38257ff24282bed65142b9aa880e1f2c731fb5e
   - name: maven-image
     type: registry-image-davis
     icon: oci
